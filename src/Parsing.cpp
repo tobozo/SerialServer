@@ -1,7 +1,8 @@
 /*
-  Parsing.cpp - HTTP request parsing.
+  Parsing.cpp - HTTP request parsing for SerialServer
 
-  Copyright (c) 2015 Ivan Grokhotkov. All rights reserved.
+  cloned from ESP8266webServer by Ivan Grokhotkov 
+  adapted by tobozo
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -59,17 +60,17 @@ bool SerialServer::_parseRequest() {
   }
   _currentUri = url;
 
-  HTTPMethod method = HTTP_GET;
+  SerialHTTPMethod method = SerialHTTP_GET;
   if (methodStr == "POST") {
-    method = HTTP_POST;
+    method = SerialHTTP_POST;
   } else if (methodStr == "DELETE") {
-    method = HTTP_DELETE;
+    method = SerialHTTP_DELETE;
   } else if (methodStr == "OPTIONS") {
-    method = HTTP_OPTIONS;
+    method = SerialHTTP_OPTIONS;
   } else if (methodStr == "PUT") {
-    method = HTTP_PUT;
+    method = SerialHTTP_PUT;
   } else if (methodStr == "PATCH") {
-    method = HTTP_PATCH;
+    method = SerialHTTP_PATCH;
   }
   _currentMethod = method;
 
@@ -92,7 +93,7 @@ bool SerialServer::_parseRequest() {
 
   String formData;
   // below is needed only when POST type request
-  if (method == HTTP_POST || method == HTTP_PUT || method == HTTP_PATCH || method == HTTP_DELETE){
+  if (method == SerialHTTP_POST || method == SerialHTTP_PUT || method == SerialHTTP_PATCH || method == SerialHTTP_DELETE){
     String boundaryStr;
     String headerName;
     String headerValue;
@@ -399,7 +400,7 @@ bool SerialServer::_parseForm(String boundary, uint32_t len){
               break;
             }
           } else {
-            _currentUpload.status = UPLOAD_FILE_START;
+            _currentUpload.status = SerialUPLOAD_FILE_START;
             _currentUpload.name = argName;
             _currentUpload.filename = argFilename;
             _currentUpload.type = argType;
@@ -413,7 +414,7 @@ bool SerialServer::_parseForm(String boundary, uint32_t len){
 #endif
             if(_currentHandler && _currentHandler->canUpload(_currentUri))
               _currentHandler->upload(*this, _currentUri, _currentUpload);
-            _currentUpload.status = UPLOAD_FILE_WRITE;
+            _currentUpload.status = SerialUPLOAD_FILE_WRITE;
             uint8_t argByte = _uploadReadByte();
 readfile:
             while(argByte != 0x0D){
@@ -451,7 +452,7 @@ readfile:
                 if(_currentHandler && _currentHandler->canUpload(_currentUri))
                   _currentHandler->upload(*this, _currentUri, _currentUpload);
                 _currentUpload.totalSize += _currentUpload.currentSize;
-                _currentUpload.status = UPLOAD_FILE_END;
+                _currentUpload.status = SerialUPLOAD_FILE_END;
                 if(_currentHandler && _currentHandler->canUpload(_currentUri))
                   _currentHandler->upload(*this, _currentUri, _currentUpload);
 #ifdef DEBUG
@@ -550,7 +551,7 @@ String SerialServer::urlDecode(const String& text)
 }
 
 bool SerialServer::_parseFormUploadAborted(){
-  _currentUpload.status = UPLOAD_FILE_ABORTED;
+  _currentUpload.status = SerialUPLOAD_FILE_ABORTED;
   if(_currentHandler && _currentHandler->canUpload(_currentUri))
     _currentHandler->upload(*this, _currentUri, _currentUpload);
   return false;

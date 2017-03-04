@@ -5,7 +5,7 @@
 
 class FunctionRequestHandler : public RequestHandler {
 public:
-    FunctionRequestHandler(SerialServer::THandlerFunction fn, SerialServer::THandlerFunction ufn, const char* uri, HTTPMethod method)
+    FunctionRequestHandler(SerialServer::THandlerFunction fn, SerialServer::THandlerFunction ufn, const char* uri, SerialHTTPMethod method)
     : _fn(fn)
     , _ufn(ufn)
     , _uri(uri)
@@ -13,8 +13,8 @@ public:
     {
     }
 
-    bool canHandle(HTTPMethod requestMethod, String requestUri) override  {
-        if (_method != HTTP_ANY && _method != requestMethod)
+    bool canHandle(SerialHTTPMethod requestMethod, String requestUri) override  {
+        if (_method != SerialHTTP_ANY && _method != requestMethod)
             return false;
 
         if (requestUri != _uri)
@@ -24,13 +24,13 @@ public:
     }
 
     bool canUpload(String requestUri) override  {
-        if (!_ufn || !canHandle(HTTP_POST, requestUri))
+        if (!_ufn || !canHandle(SerialHTTP_POST, requestUri))
             return false;
 
         return true;
     }
 
-    bool handle(SerialServer& server, HTTPMethod requestMethod, String requestUri) override {
+    bool handle(SerialServer& server, SerialHTTPMethod requestMethod, String requestUri) override {
         if (!canHandle(requestMethod, requestUri))
             return false;
 
@@ -38,7 +38,7 @@ public:
         return true;
     }
 
-    void upload(SerialServer& server, String requestUri, HTTPUpload& upload) override {
+    void upload(SerialServer& server, String requestUri, SerialHTTPUpload& upload) override {
         if (canUpload(requestUri))
             _ufn();
     }
@@ -47,7 +47,7 @@ protected:
     SerialServer::THandlerFunction _fn;
     SerialServer::THandlerFunction _ufn;
     String _uri;
-    HTTPMethod _method;
+    SerialHTTPMethod _method;
 };
 
 class StaticRequestHandler : public RequestHandler {
@@ -63,8 +63,8 @@ public:
         _baseUriLength = _uri.length();
     }
 
-    bool canHandle(HTTPMethod requestMethod, String requestUri) override  {
-        if (requestMethod != HTTP_GET)
+    bool canHandle(SerialHTTPMethod requestMethod, String requestUri) override  {
+        if (requestMethod != SerialHTTP_GET)
             return false;
 
         if ((_isFile && requestUri != _uri) || !requestUri.startsWith(_uri))
@@ -73,7 +73,7 @@ public:
         return true;
     }
 
-    bool handle(SerialServer& server, HTTPMethod requestMethod, String requestUri) override {
+    bool handle(SerialServer& server, SerialHTTPMethod requestMethod, String requestUri) override {
         if (!canHandle(requestMethod, requestUri))
             return false;
 

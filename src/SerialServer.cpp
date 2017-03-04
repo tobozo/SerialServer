@@ -2,7 +2,8 @@
   SerialServer.cpp - Dead simple Serial web-server.
   Supports only one simultaneous client, knows how to handle GET
   
-  cloned and  from ESP8266webServer by Ivan Grokhotkov
+  cloned from ESP8266webServer by Ivan Grokhotkov 
+  adapted by tobozo
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -30,7 +31,7 @@
 
 SerialServer::SerialServer(int speed)
 : _serialspeed(speed)
-, _currentMethod(HTTP_ANY)
+, _currentMethod(SerialHTTP_ANY)
 , _currentHandler(0)
 , _firstHandler(0)
 , _lastHandler(0)
@@ -61,14 +62,14 @@ void SerialServer::begin() {
 }
 
 void SerialServer::on(const char* uri, SerialServer::THandlerFunction handler) {
-  on(uri, HTTP_ANY, handler);
+  on(uri, SerialHTTP_ANY, handler);
 }
 
-void SerialServer::on(const char* uri, HTTPMethod method, SerialServer::THandlerFunction fn) {
+void SerialServer::on(const char* uri, SerialHTTPMethod method, SerialServer::THandlerFunction fn) {
   on(uri, method, fn, _fileUploadHandler);
 }
 
-void SerialServer::on(const char* uri, HTTPMethod method, SerialServer::THandlerFunction fn, SerialServer::THandlerFunction ufn) {
+void SerialServer::on(const char* uri, SerialHTTPMethod method, SerialServer::THandlerFunction fn, SerialServer::THandlerFunction ufn) {
   _addRequestHandler(new FunctionRequestHandler(fn, ufn, uri, method));
 }
 

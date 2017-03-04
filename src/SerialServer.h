@@ -1,8 +1,9 @@
 /*
-  SerialServer.h - Dead simple web-server.
-  Supports only one simultaneous client, knows how to handle GET and POST.
+  SerialServer.h - Dead simple Serial web-server.
+  Supports only one simultaneous client, knows how to handle GET.
 
-  Copyright (c) 2014 Ivan Grokhotkov. All rights reserved.
+  cloned from ESP8266webServer by Ivan Grokhotkov 
+  adapted by tobozo
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -26,9 +27,8 @@
 
 #include <functional>
 
-enum HTTPMethod { HTTP_ANY, HTTP_GET, HTTP_POST, HTTP_PUT, HTTP_PATCH, HTTP_DELETE, HTTP_OPTIONS };
-enum HTTPUploadStatus { UPLOAD_FILE_START, UPLOAD_FILE_WRITE, UPLOAD_FILE_END,
-                        UPLOAD_FILE_ABORTED };
+enum SerialHTTPMethod { SerialHTTP_ANY, SerialHTTP_GET, SerialHTTP_POST, SerialHTTP_PUT, SerialHTTP_PATCH, SerialHTTP_DELETE, SerialHTTP_OPTIONS };
+enum SerialHTTPUploadStatus { SerialUPLOAD_FILE_START, SerialUPLOAD_FILE_WRITE, SerialUPLOAD_FILE_END, SerialUPLOAD_FILE_ABORTED };
 
 #define HTTP_DOWNLOAD_UNIT_SIZE 1460
 #define HTTP_UPLOAD_BUFLEN 2048
@@ -41,14 +41,14 @@ enum HTTPUploadStatus { UPLOAD_FILE_START, UPLOAD_FILE_WRITE, UPLOAD_FILE_END,
 class SerialServer;
 
 typedef struct {
-  HTTPUploadStatus status;
+  SerialHTTPUploadStatus status;
   String  filename;
   String  name;
   String  type;
   size_t  totalSize;    // file size
   size_t  currentSize;  // size of data currently in buf
   uint8_t buf[HTTP_UPLOAD_BUFLEN];
-} HTTPUpload;
+} SerialHTTPUpload;
 
 #include "detail/RequestHandler.h"
 
@@ -67,16 +67,16 @@ public:
 
   typedef std::function<void(void)> THandlerFunction;
   void on(const char* uri, THandlerFunction handler);
-  void on(const char* uri, HTTPMethod method, THandlerFunction fn);
-  void on(const char* uri, HTTPMethod method, THandlerFunction fn, THandlerFunction ufn);
+  void on(const char* uri, SerialHTTPMethod method, THandlerFunction fn);
+  void on(const char* uri, SerialHTTPMethod method, THandlerFunction fn, THandlerFunction ufn);
   void addHandler(RequestHandler* handler);
   void serveStatic(const char* uri, fs::FS& fs, const char* path, const char* cache_header = NULL );
   void onNotFound(THandlerFunction fn);  //called when handler is not assigned
   void onFileUpload(THandlerFunction fn); //handle file uploads
 
   String uri() { return _currentUri; }
-  HTTPMethod method() { return _currentMethod; }
-  HTTPUpload& upload() { return _currentUpload; }
+  SerialHTTPMethod method() { return _currentMethod; }
+  SerialHTTPUpload& upload() { return _currentUpload; }
 
   String arg(const char* name);   // get request argument value by name
   String arg(int i);              // get request argument value by number
@@ -142,7 +142,7 @@ protected:
   String  _incomingSerialData;
   bool    _incomingSerialDataReady;
 
-  HTTPMethod  _currentMethod;
+  SerialHTTPMethod  _currentMethod;
   String      _currentUri;
 
   RequestHandler*  _currentHandler;
@@ -153,7 +153,7 @@ protected:
 
   int              _currentArgCount;
   RequestArgument* _currentArgs;
-  HTTPUpload       _currentUpload;
+  SerialHTTPUpload       _currentUpload;
 
   int              _headerKeysCount;
   RequestArgument* _currentHeaders;
