@@ -1,16 +1,20 @@
-#ifndef REQUESTHANDLERSIMPL_H
-#define REQUESTHANDLERSIMPL_H
+#ifndef SERIALREQUESTHANDLERSIMPL_H
+#define SERIALREQUESTHANDLERSIMPL_H
 
-#include "RequestHandler.h"
+#include "SerialRequestHandler.h"
 
-class FunctionRequestHandler : public RequestHandler {
+class FunctionSerialRequestHandler : public SerialRequestHandler {
 public:
-    FunctionRequestHandler(SerialServer::THandlerFunction fn, SerialServer::THandlerFunction ufn, const char* uri, SerialHTTPMethod method)
+    FunctionSerialRequestHandler(SerialServer::THandlerFunction fn, SerialServer::THandlerFunction ufn, const char* uri, SerialHTTPMethod method)
     : _fn(fn)
     , _ufn(ufn)
     , _uri(uri)
     , _method(method)
     {
+    }
+    
+    String getUri() {
+       return _uri; 
     }
 
     bool canHandle(SerialHTTPMethod requestMethod, String requestUri) override  {
@@ -50,7 +54,7 @@ protected:
     SerialHTTPMethod _method;
 };
 
-class StaticRequestHandler : public RequestHandler {
+class StaticRequestHandler : public SerialRequestHandler {
 public:
     StaticRequestHandler(FS& fs, const char* path, const char* uri, const char* cache_header)
     : _fs(fs)
@@ -71,6 +75,11 @@ public:
             return false;
 
         return true;
+    }
+    
+    
+    String getUri() {
+       return _uri; 
     }
 
     bool handle(SerialServer& server, SerialHTTPMethod requestMethod, String requestUri) override {
@@ -140,4 +149,4 @@ protected:
 };
 
 
-#endif //REQUESTHANDLERSIMPL_H
+#endif //SERIALREQUESTHANDLERSIMPL_H

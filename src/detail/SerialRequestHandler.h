@@ -1,18 +1,19 @@
-#ifndef REQUESTHANDLER_H
-#define REQUESTHANDLER_H
+#ifndef SERIALREQUESTHANDLER_H
+#define SERIALREQUESTHANDLER_H
 
-class RequestHandler {
+class SerialRequestHandler {
 public:
     virtual bool canHandle(SerialHTTPMethod method, String uri) { return false; }
     virtual bool canUpload(String uri) { return false; }
     virtual bool handle(SerialServer& server, SerialHTTPMethod requestMethod, String requestUri) { return false; }
     virtual void upload(SerialServer& server, String requestUri, SerialHTTPUpload& upload) {}
+    virtual String getUri() { return ""; }
 
-    RequestHandler* next() { return _next; }
-    void next(RequestHandler* r) { _next = r; }
+    SerialRequestHandler* next() { return _next; }
+    void next(SerialRequestHandler* r) { _next = r; }
 
 private:
-    RequestHandler* _next = nullptr;
+    SerialRequestHandler* _next = nullptr;
 };
 
-#endif //REQUESTHANDLER_H
+#endif //SERIALREQUESTHANDLER_H

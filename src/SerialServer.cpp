@@ -25,7 +25,7 @@
 #include <Arduino.h>
 #include "SerialServer.h"
 #include "FS.h"
-#include "detail/RequestHandlersImpl.h"
+#include "detail/SerialRequestHandlersImpl.h"
 //#define DEBUG
 #define DEBUG_OUTPUT Serial
 
@@ -49,13 +49,24 @@ SerialServer::~SerialServer() {
   if (_currentHeaders)
     delete[]_currentHeaders;
   _headerKeysCount = 0;
-  RequestHandler* handler = _firstHandler;
+  SerialRequestHandler* handler = _firstHandler;
   while (handler) {
-    RequestHandler* next = handler->next();
+    SerialRequestHandler* next = handler->next();
     delete handler;
     handler = next;
   }
 }
+
+String SerialServer::getManifest() {
+  String out = "{[";
+  SerialRequestHandler* handler;
+  for (handler = _firstHandler; handler; handler = handler->next()) {
+    out += "\"" + handler->getUri() + "\",";
+  }
+  out+= "\"\"]}";
+  return out;
+}
+
 
 void SerialServer::begin() {
   Serial.begin(_serialspeed);
@@ -70,14 +81,14 @@ void SerialServer::on(const char* uri, SerialHTTPMethod method, SerialServer::TH
 }
 
 void SerialServer::on(const char* uri, SerialHTTPMethod method, SerialServer::THandlerFunction fn, SerialServer::THandlerFunction ufn) {
-  _addRequestHandler(new FunctionRequestHandler(fn, ufn, uri, method));
+  _addRequestHandler(new FunctionSerialRequestHandler(fn, ufn, uri, method));
 }
 
-void SerialServer::addHandler(RequestHandler* handler) {
+void SerialServer::addHandler(SerialRequestHandler* handler) {
     _addRequestHandler(handler);
 }
 
-void SerialServer::_addRequestHandler(RequestHandler* handler) {
+void SerialServer::_addRequestHandler(SerialRequestHandler* handler) {
     if (!_lastHandler) {
       _firstHandler = handler;
       _lastHandler = handler;
@@ -90,6 +101,11 @@ void SerialServer::_addRequestHandler(RequestHandler* handler) {
 
 void SerialServer::serveStatic(const char* uri, FS& fs, const char* path, const char* cache_header) {
     _addRequestHandler(new StaticRequestHandler(fs, path, uri, cache_header));
+}
+
+
+SerialRequestHandler* SerialServer::getFirsHandler() {
+  return _firstHandler;
 }
 
 

@@ -84,7 +84,7 @@ bool SerialServer::_parseRequest() {
 #endif
 
   //attach handler
-  RequestHandler* handler;
+  SerialRequestHandler* handler;
   for (handler = _firstHandler; handler; handler = handler->next()) {
     if (handler->canHandle(_currentMethod, _currentUri))
       break;

@@ -50,7 +50,7 @@ typedef struct {
   uint8_t buf[HTTP_UPLOAD_BUFLEN];
 } SerialHTTPUpload;
 
-#include "detail/RequestHandler.h"
+#include "detail/SerialRequestHandler.h"
 
 namespace fs {
 class FS;
@@ -64,12 +64,13 @@ public:
 
   void begin();
   void handleClient();
+  String getManifest();
 
   typedef std::function<void(void)> THandlerFunction;
   void on(const char* uri, THandlerFunction handler);
   void on(const char* uri, SerialHTTPMethod method, THandlerFunction fn);
   void on(const char* uri, SerialHTTPMethod method, THandlerFunction fn, THandlerFunction ufn);
-  void addHandler(RequestHandler* handler);
+  void addHandler(SerialRequestHandler* handler);
   void serveStatic(const char* uri, fs::FS& fs, const char* path, const char* cache_header = NULL );
   void onNotFound(THandlerFunction fn);  //called when handler is not assigned
   void onFileUpload(THandlerFunction fn); //handle file uploads
@@ -107,6 +108,9 @@ public:
   void sendContent(const String& content);
   void sendContent_P(PGM_P content);
   void sendContent_P(PGM_P content, size_t size);
+  
+  
+  SerialRequestHandler* getFirsHandler();
 
 template<typename T> size_t streamFile(T &file, const String& contentType){
   setContentLength(file.size());
@@ -120,7 +124,7 @@ template<typename T> size_t streamFile(T &file, const String& contentType){
 }
 
 protected:
-  void _addRequestHandler(RequestHandler* handler);
+  void _addRequestHandler(SerialRequestHandler* handler);
   void _handleRequest();
   bool _parseRequest();
   void _parseArguments(String data);
@@ -145,9 +149,9 @@ protected:
   SerialHTTPMethod  _currentMethod;
   String      _currentUri;
 
-  RequestHandler*  _currentHandler;
-  RequestHandler*  _firstHandler;
-  RequestHandler*  _lastHandler;
+  SerialRequestHandler*  _currentHandler;
+  SerialRequestHandler*  _firstHandler;
+  SerialRequestHandler*  _lastHandler;
   THandlerFunction _notFoundHandler;
   THandlerFunction _fileUploadHandler;
 
