@@ -30,7 +30,7 @@
 enum SerialHTTPMethod { SerialHTTP_ANY, SerialHTTP_GET, SerialHTTP_POST, SerialHTTP_PUT, SerialHTTP_PATCH, SerialHTTP_DELETE, SerialHTTP_OPTIONS };
 enum SerialHTTPUploadStatus { SerialUPLOAD_FILE_START, SerialUPLOAD_FILE_WRITE, SerialUPLOAD_FILE_END, SerialUPLOAD_FILE_ABORTED };
 
-#define HTTP_DOWNLOAD_UNIT_SIZE 1460
+#define SERIALHTTP_DOWNLOAD_UNIT_SIZE 1560
 #define HTTP_UPLOAD_BUFLEN 2048
 #define HTTP_MAX_DATA_WAIT 1000 //ms to wait for the client to send the request
 #define HTTP_MAX_CLOSE_WAIT 2000 //ms to wait for the client to close the connection
@@ -148,6 +148,7 @@ protected:
 
   SerialHTTPMethod  _currentMethod;
   String      _currentUri;
+  String      _currentRequestUri;
 
   SerialRequestHandler*  _currentHandler;
   SerialRequestHandler*  _firstHandler;

@@ -54,6 +54,7 @@ bool SerialServer::_parseRequest() {
   String url = req.substring(addr_start + 1, addr_end);
   String searchStr = "";
   int hasSearch = url.indexOf('?');
+  _currentRequestUri = url;
   if (hasSearch != -1){
     searchStr = url.substring(hasSearch + 1);
     url = url.substring(0, hasSearch);

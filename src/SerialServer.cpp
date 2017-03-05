@@ -174,6 +174,7 @@ void SerialServer::_prepareHeader(String& response, int code, const char* conten
     }
     sendHeader("Connection", "close");
     sendHeader("Access-Control-Allow-Origin", "*");
+    sendHeader("X-Initial-Request", _currentRequestUri);
 
     response += _responseHeaders;
     response += "\r\n";
@@ -221,7 +222,7 @@ void SerialServer::send(int code, const String& content_type, const String& cont
 }
 
 void SerialServer::sendContent(const String& content) {
-  const size_t unit_size = HTTP_DOWNLOAD_UNIT_SIZE;
+  const size_t unit_size = SERIALHTTP_DOWNLOAD_UNIT_SIZE;
   size_t size_to_send = content.length();
   const char* send_start = content.c_str();
 
@@ -233,25 +234,28 @@ void SerialServer::sendContent(const String& content) {
     }
     size_to_send -= sent;
     send_start += sent;
+    // seems like this is required to get the cordovarduino 
+    // plugin to flush its buffer without losing data
+    delay(300);
   }
 }
 
 void SerialServer::sendContent_P(PGM_P content) {
-    char contentUnit[HTTP_DOWNLOAD_UNIT_SIZE + 1];
+    char contentUnit[SERIALHTTP_DOWNLOAD_UNIT_SIZE + 1];
 
-    contentUnit[HTTP_DOWNLOAD_UNIT_SIZE] = '\0';
+    contentUnit[SERIALHTTP_DOWNLOAD_UNIT_SIZE] = '\0';
 
     while (content != NULL) {
         size_t contentUnitLen;
         PGM_P contentNext;
 
         // due to the memccpy signature, lots of casts are needed
-        contentNext = (PGM_P)memccpy_P((void*)contentUnit, (PGM_VOID_P)content, 0, HTTP_DOWNLOAD_UNIT_SIZE);
+        contentNext = (PGM_P)memccpy_P((void*)contentUnit, (PGM_VOID_P)content, 0, SERIALHTTP_DOWNLOAD_UNIT_SIZE);
 
         if (contentNext == NULL) {
             // no terminator, more data available
-            content += HTTP_DOWNLOAD_UNIT_SIZE;
-            contentUnitLen = HTTP_DOWNLOAD_UNIT_SIZE;
+            content += SERIALHTTP_DOWNLOAD_UNIT_SIZE;
+            contentUnitLen = SERIALHTTP_DOWNLOAD_UNIT_SIZE;
         }
         else {
             // reached terminator. Do not send the terminator
@@ -265,14 +269,14 @@ void SerialServer::sendContent_P(PGM_P content) {
 }
 
 void SerialServer::sendContent_P(PGM_P content, size_t size) {
-    char contentUnit[HTTP_DOWNLOAD_UNIT_SIZE + 1];
-    contentUnit[HTTP_DOWNLOAD_UNIT_SIZE] = '\0';
+    char contentUnit[SERIALHTTP_DOWNLOAD_UNIT_SIZE + 1];
+    contentUnit[SERIALHTTP_DOWNLOAD_UNIT_SIZE] = '\0';
     size_t remaining_size = size;
 
     while (content != NULL && remaining_size > 0) {
-        size_t contentUnitLen = HTTP_DOWNLOAD_UNIT_SIZE;
+        size_t contentUnitLen = SERIALHTTP_DOWNLOAD_UNIT_SIZE;
 
-        if (remaining_size < HTTP_DOWNLOAD_UNIT_SIZE) contentUnitLen = remaining_size;
+        if (remaining_size < SERIALHTTP_DOWNLOAD_UNIT_SIZE) contentUnitLen = remaining_size;
         // due to the memcpy signature, lots of casts are needed
         memcpy_P((void*)contentUnit, (PGM_VOID_P)content, contentUnitLen);
 
